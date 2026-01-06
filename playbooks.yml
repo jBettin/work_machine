@@ -1,0 +1,14 @@
+---
+- name: Setup PC
+  hosts: all
+  become: yes
+  roles:
+    - slack
+    - vivaldi
+    - docker
+    - nvchad
+    - vscode    
+    - zsh
+    - spotify
+    - keepassxc
+    - terraform 

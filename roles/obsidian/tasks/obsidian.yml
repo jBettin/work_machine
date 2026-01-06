@@ -1,0 +1,10 @@
+---
+- name: Install Obsidian via Snap
+  hosts: all
+  become: yes
+  tasks:
+    - name: Install Obsidian note-taking app
+      community.general.snap:
+        name: obsidian
+        classic: yes
+        state: present

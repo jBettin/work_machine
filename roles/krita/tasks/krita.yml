@@ -1,0 +1,18 @@
+---
+- name: Install Krita (Digital Painting)
+  hosts: all
+  become: yes
+  tasks:
+    - name: Add Krita Lime PPA repository
+      ansible.builtin.apt_repository:
+        repo: 'ppa:kritalime/ppa'
+        state: present
+        update_cache: yes
+
+    - name: Install Krita and support packages
+      ansible.builtin.apt:
+        name:
+          - krita
+          - krita-l10n  # Sprachpaket für Deutsch
+          - ffms2       # Für besseren Video/Animation-Support
+        state: present

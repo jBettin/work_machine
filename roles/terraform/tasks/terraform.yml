@@ -1,0 +1,46 @@
+---
+- name: Install Terraform on Ubuntu
+  hosts: all
+  become: yes
+  tasks:
+    - name: Install dependencies
+      ansible.builtin.apt:
+        name:
+          - gnupg
+          - software-properties-common
+          - curl
+        state: present
+        update_cache: yes
+
+    - name: Create directory for HashiCorp GPG key
+      ansible.builtin.file:
+        path: /usr/share/keyrings
+        state: directory
+        mode: '0755'
+
+    - name: Add HashiCorp GPG key
+      ansible.builtin.get_url:
+        url: https://apt.releases.hashicorp.com/gpg
+        dest: /usr/share/keyrings/hashicorp-archive-keyring.gpg
+        mode: '0644'
+
+    - name: Add HashiCorp Repository
+      ansible.builtin.apt_repository:
+        repo: "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com {{ ansible_distribution_release }} main"
+        state: present
+        filename: hashicorp
+
+    - name: Install Terraform
+      ansible.builtin.apt:
+        name: terraform
+        state: present
+        update_cache: yes
+
+    - name: Verify Terraform installation
+      ansible.builtin.command: terraform -version
+      register: terraform_version
+      changed_when: false
+
+    - name: Show Terraform version
+      ansible.builtin.debug:
+        msg: "Terraform wurde erfolgreich installiert: {{ terraform_version.stdout }}"

@@ -1,0 +1,9 @@
+---
+- name: Install Postman via Snap
+  hosts: all
+  become: yes
+  tasks:
+    - name: Install Postman API Platform
+      community.general.snap:
+        name: postman
+        state: present

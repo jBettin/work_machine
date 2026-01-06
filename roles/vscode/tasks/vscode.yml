@@ -1,0 +1,70 @@
+---
+- name: install vscode
+  host: localhost
+  connection: local
+  become: yes
+
+  tasks:
+    - name: import gpg key
+      ansible.builtin.apt_key:
+        url: https://packages.microsoft.com/keys/microsoft.asc
+        state: present
+      register: key_import
+
+    - name: add vscode repository
+      ansible.builtin.apt_repository:
+        repo: deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main
+        state: present
+        filename: vscode
+      register: repo_add
+
+    - name: install vscode
+      ansible.builtin.apt:
+        name: code
+        state: present
+        update_cache: yes
+
+---
+- name: VS Code Terminal Font Setup
+  hosts: all
+  become: no  # Für User-Einstellungen meist nicht nötig, außer für die Font-Installation
+  vars:
+    # Name der Schriftart, wie sie in VS Code eingetragen wird
+    font_name: "FiraCode Nerd Font"
+    # Pfad zur VS Code settings.json
+    vscode_settings_path: "~/.config/Code/User/settings.json"
+
+  tasks:
+    - name: Ensure font directory exists
+      ansible.builtin.file:
+        path: "~/.local/share/fonts"
+        state: directory
+        mode: '0755'
+
+    - name: Download and Install FiraCode Nerd Font (Example)
+      ansible.builtin.get_url:
+        url: "https://github.com/ryanoasis/nerd-fonts/releases/download/v3.1.1/FiraCode.zip"
+        dest: "/tmp/FiraCode.zip"
+      # Hinweis: In einer vollen Automatisierung müsste hier noch 'unarchive' folgen
+      # Für dieses Beispiel nehmen wir an, die Font ist systemweit verfügbar oder wird manuell installiert.
+
+    - name: Create VS Code User directory if it doesn't exist
+      ansible.builtin.file:
+        path: "~/.config/Code/User"
+        state: directory
+        mode: '0755'
+
+    - name: Apply VS Code Terminal Font Settings
+      # Wir nutzen 'copy' mit 'content', um sicherzustellen, dass die JSON korrekt ist.
+      # Achtung: Das überschreibt vorhandene Einstellungen! 
+      # Für ein "Hinzufügen" wäre das Modul 'community.general.json_modify' besser.
+      ansible.builtin.copy:
+        dest: "{{ vscode_settings_path }}"
+        content: |
+          {
+            "terminal.integrated.fontFamily": "{{ font_name }}",
+            "terminal.integrated.fontSize": 14,
+            "editor.fontFamily": "'Fira Code', 'Droid Sans Mono', 'monospace'",
+            "editor.fontLigatures": true
+          }
+        mode: '0644'

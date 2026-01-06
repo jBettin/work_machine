@@ -1,0 +1,47 @@
+# --- IDEs & Editoren ---
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# --- Ansible ---
+*.retry
+inventory.ini
+# Falls du Ansible Vault Passwörter in Dateien speicherst:
+.vault_pass
+
+# --- Golang ---
+# Binärdateien
+bin/
+# Abhängigkeiten
+vendor/
+# Test-Coverages
+*.out
+*.test
+
+# --- Terraform ---
+# Lokaler State und Plugins
+.terraform/
+*.tfstate
+*.tfstate.*
+# Variablen-Dateien (könnten Geheimnisse enthalten)
+*.tfvars
+*.tfvars.json
+
+# --- Docker & Kubernetes ---
+# Log-Dateien
+*.log
+# Lokale Kubeconfigs (Vorsicht: enthalten oft Secrets!)
+kubeconfig
+.kube/
+
+# --- Betriebssystem (Linux/Ubuntu) ---
+.DS_Store
+.directory
+*~
+
+# --- Passwörter & Secrets (Allgemein) ---
+.env
+*.pem
+*.key
+*.pub

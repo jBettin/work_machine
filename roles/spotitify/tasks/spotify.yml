@@ -1,0 +1,9 @@
+---
+- name: Install Spotify via Snap
+  hosts: all
+  become: yes
+  tasks:
+    - name: Install Spotify snap package
+      community.general.snap:
+        name: spotify
+        state: present
