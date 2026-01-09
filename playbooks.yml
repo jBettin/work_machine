@@ -1,6 +1,7 @@
 ---
 - name: Setup PC
-  hosts: all
+  hosts: localhost
+  connection: local
   become: yes
   roles:
     - zsh
