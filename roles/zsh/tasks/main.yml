@@ -1,10 +1,7 @@
 ---
 - name: Setup Zsh and Powerlevel10k
-  hosts: localhost
-  connection: local
   become: yes
   vars:
-    # Der Benutzer, für den Zsh konfiguriert werden soll
     target_user: "{{ ansible_env.USER }}"
     user_home: "{{ ansible_env.HOME }}"
 
