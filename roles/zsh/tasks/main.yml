@@ -1,47 +1,42 @@
 ---
-name: Setup Zsh and Powerlevel10k
-become: yes
-vars:
-  target_user: "{{ ansible_env.USER }}"
-  user_home: "{{ ansible_env.HOME }}"
+- name: Install Zsh and Git
+  ansible.builtin.apt:
+    name:
+      - zsh
+      - git
+    state: present
+    update_cache: yes
 
-tasks:
-  - name: Install Zsh and Git
-    ansible.builtin.package:
-      name:
-        - zsh
-        - git
-      state: present
+- name: Change default shell to Zsh
+  ansible.builtin.user:
+    name: "{{ lookup('env', 'USER') }}"
+    shell: /usr/bin/zsh
 
-  - name: Change default shell to Zsh
-    ansible.builtin.user:
-      name: "{{ target_user }}"
-      shell: /bin/zsh
+- name: Clone Oh My Zsh
+  become: no
+  ansible.builtin.git:
+    repo: https://github.com/ohmyzsh/ohmyzsh.git
+    dest: "{{ ansible_env.HOME }}/.oh-my-zsh"
+    depth: 1
 
-  - name: Install Oh My Zsh (manual clone)
-    become: no
-    ansible.builtin.git:
-      repo: https://github.com/ohmyzsh/ohmyzsh.git
-      dest: "{{ user_home }}/.oh-my-zsh"
-      depth: 1
+- name: Clone Powerlevel10k Theme
+  become: no
+  ansible.builtin.git:
+    repo: https://github.com/romkatv/powerlevel10k.git
+    dest: "{{ ansible_env.HOME }}/.oh-my-zsh/custom/themes/powerlevel10k"
+    depth: 1
 
-  - name: Install Powerlevel10k Theme
-    become: no
-    ansible.builtin.git:
-      repo: https://github.com/romkatv/powerlevel10k.git
-      dest: "{{ user_home }}/.oh-my-zsh/custom/themes/powerlevel10k"
-      depth: 1
+- name: Create .zshrc from template
+  become: no
+  ansible.builtin.copy:
+    src: "{{ ansible_env.HOME }}/.oh-my-zsh/templates/zshrc.zsh-template"
+    dest: "{{ ansible_env.HOME }}/.zshrc"
+    force: no
+    remote_src: yes
 
-  - name: Create .zshrc from Oh My Zsh template
-    become: no
-    ansible.builtin.copy:
-      src: "{{ user_home }}/.oh-my-zsh/templates/zshrc.zsh-template"
-      dest: "{{ user_home }}/.zshrc"
-      force: no  # Überschreibt die Datei nicht, falls sie schon existiert
-
-  - name: Set ZSH_THEME to powerlevel10k in .zshrc
-    become: no
-    ansible.builtin.lineinfile:
-      path: "{{ user_home }}/.zshrc"
-      regexp: '^ZSH_THEME='
-      line: 'ZSH_THEME="powerlevel10k/powerlevel10k"'
+- name: Set ZSH_THEME to powerlevel10k
+  become: no
+  ansible.builtin.lineinfile:
+    path: "{{ ansible_env.HOME }}/.zshrc"
+    regexp: '^ZSH_THEME='
+    line: 'ZSH_THEME="powerlevel10k/powerlevel10k"'
