@@ -1,6 +1,6 @@
 ---
 - name: Setup PC
-  hosts: localhost
+  hosts: localhost 
   connection: local
   become: yes
   roles:
