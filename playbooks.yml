@@ -3,12 +3,17 @@
   hosts: all
   become: yes
   roles:
-    - slack
-    - vivaldi
-    - docker
-    - nvchad
-    - vscode    
     - zsh
-    - spotify
-    - keepassxc
+    - nvchad
+    - docker
+    - kubernetes
+    - vscode    
     - terraform 
+    - keepassxc
+
+    - obsidian
+    - vivaldi
+    - slack
+    - postman
+    - krita
+    - spotify
