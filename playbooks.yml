@@ -7,7 +7,7 @@
     #- zsh
     - nvchad
     - docker
-    - kubernetes
+    #- kubernetes
     - vscode    
     - terraform 
     - keypassxc
