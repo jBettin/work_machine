@@ -23,11 +23,9 @@ terraform_version: "1.7.0"
 docker_users:
   - "{{ dev_user }}"
 
-# NvChad Einstellungen
-nvchad_repo: "https://github.com/NvChad/NvChad"
-nvchad_version: "v2.5" # Oder 'v2.0'
-# Wir nutzen den stabilen AppImage-Weg für ein aktuelles Neovim
-nvim_appimage_url: "https://github.com/neovim/neovim/releases/latest/download/nvim.appimage"
+nvim_dest_dir: "{{ ansible_env.HOME }}/.config/nvim"
+nvchad_repo: "https://github.com/NvChad/starter"
+backup_suffix: ".bak_{{ ansible_date_time.date }}"
 
 # Vivaldi Einstellungen
 vivaldi_package: "vivaldi-stable"

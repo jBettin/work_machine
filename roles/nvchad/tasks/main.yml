@@ -1,47 +1,33 @@
 ---
-- name: Install dependencies for Neovim and NvChad
-  ansible.builtin.apt:
-    name:
-      - git
-      - curl
-      - unzip
-      - build-essential
-      - python3-pip
-      - ripgrep
+- name: System-Abhängigkeiten installieren
+  become: yes
+  apt:
+    name: "{{ dependencies }}"
     state: present
     update_cache: yes
 
-- name: Download Neovim AppImage
-  ansible.builtin.get_url:
-    url: "{{ nvim_appimage_url }}"
-    dest: /usr/local/bin/nvim
-    mode: '0755'
+- name: Prüfen, ob eine alte Neovim-Konfiguration existiert
+  stat:
+    path: "{{ nvim_dest_dir }}"
+  register: nvim_dir
 
-- name: Ensure Nvim config directory is clean
-  become: no
-  ansible.builtin.file:
-    path: "{{ dev_home }}/.config/nvim"
-    state: absent
-  when: nvchad_force_reinstall | default(false)
+- name: Bestehende Konfiguration sichern
+  command: "mv {{ nvim_dest_dir }} {{ nvim_dest_dir }}{{ backup_suffix }}"
+  when: nvim_dir.stat.exists and nvim_dir.stat.isdir
+  # Verhindert Fehler, falls das Verzeichnis bereits verschoben wurde
+  args:
+    creates: "{{ nvim_dest_dir }}{{ backup_suffix }}"
 
-- name: Clone NvChad repository
-  become: no
-  ansible.builtin.git:
+- name: NvChad Starter Repository klonen
+  git:
     repo: "{{ nvchad_repo }}"
-    dest: "{{ dev_home }}/.config/nvim"
-    version: "{{ nvchad_version }}"
+    dest: "{{ nvim_dest_dir }}"
     depth: 1
+    update: yes
 
-- name: Fix ownership of nvim config
-  ansible.builtin.file:
-    path: "{{ dev_home }}/.config/nvim"
-    owner: "{{ dev_user }}"
-    group: "{{ dev_user }}"
-    recurse: yes
-
-- name: Create local bin directory for user
-  become: no
-  ansible.builtin.file:
-    path: "{{ dev_home }}/.local/bin"
+- name: Berechtigungen für den aktuellen User sicherstellen
+  file:
+    path: "{{ nvim_dest_dir }}"
     state: directory
-    mode: '0755'
+    recurse: yes
+    owner: "{{ ansible_user_id }}"
