@@ -57,7 +57,6 @@
 
     # --- ZSH CONFIG ---
 - name: Enable Zsh Completion for kubectl and helm
-  become: no
   ansible.builtin.blockinfile:
     path: "{{ ansible_env.HOME }}/.zshrc"
     block: |
