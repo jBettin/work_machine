@@ -1,0 +1,35 @@
+---
+# Benutzer-Einstellungen
+dev_user: "jerome"
+dev_home: "/home/{{ dev_user }}"
+
+# Zsh Einstellungen
+zsh_theme: "powerlevel10k/powerlevel10k"
+zsh_plugins:
+  - git
+  - docker
+  - kubectl
+  - sudo
+
+# Cloud Tools Versionen
+go_version: "1.25.0"  # Hier die gewünschte Version eintragen
+go_archive: "go{{ go_version }}.linux-amd64.tar.gz"
+go_download_url: "https://go.dev/dl/{{ go_archive }}"
+
+#terraform Einstellungen
+terraform_version: "1.7.0"
+
+# Docker Einstellungen
+docker_users:
+  - "{{ dev_user }}"
+
+# NvChad Einstellungen
+nvchad_repo: "https://github.com/NvChad/NvChad"
+nvchad_version: "v2.5" # Oder 'v2.0'
+# Wir nutzen den stabilen AppImage-Weg für ein aktuelles Neovim
+nvim_appimage_url: "https://github.com/neovim/neovim/releases/latest/download/nvim.appimage"
+
+# Vivaldi Einstellungen
+vivaldi_package: "vivaldi-stable"
+vivaldi_repo_url: "https://repo.vivaldi.com/archive/deb/"
+vivaldi_gpg_key: "https://repo.vivaldi.com/archive/linux_signing_key.pub"

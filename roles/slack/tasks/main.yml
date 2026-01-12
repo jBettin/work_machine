@@ -1,10 +1,6 @@
 ---
-- name: slack on linux 
-  hosts: all
-  become: yes  # Erfordert Root-Rechte
-  tasks:
-    - name: slack via snap
-      community.general.snap:
-        name: slack
-        classic: yes
-        state: present
+- name: Install Slack via Snap
+  community.general.snap:
+    name: slack
+    classic: yes
+    state: present

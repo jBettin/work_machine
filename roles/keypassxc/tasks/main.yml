@@ -1,4 +1,4 @@
 - name: Install KeePassXC via Snap (Recommended for XC)
-      community.general.snap:
-        name: keepassxc
-        state: presentkubernetes
+  community.general.snap:
+    name: keepassxc
+    state: present

@@ -1,92 +1,38 @@
 ---
-- name: Vivaldi Browser Installation
-  hosts: all
-  become: yes
-  tasks:
-    # --- Sektion für Ubuntu/Debian ---
-    - name: add GPG-keys (Debian/Ubuntu)
-      when: ansible_os_family == "Debian"
-      ansible.builtin.get_url:
-        url: https://repo.vivaldi.com/stable/linux_signing_key.pub
-        dest: /usr/share/keyrings/vivaldi-browser.gpg
-        mode: '0644'
+- name: Install dependencies for Vivaldi
+  ansible.builtin.apt:
+    name:
+      - wget
+      - gnupg
+      - apt-transport-https
+    state: present
+    update_cache: yes
 
-    - name: add Vivaldi Repository (Debian/Ubuntu)
-      when: ansible_os_family == "Debian"
-      ansible.builtin.apt_repository:
-        repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/vivaldi-browser.gpg] https://repo.vivaldi.com/stable/deb/ stable main"
-        state: present
-        filename: vivaldi
+- name: Create directory for GPG keyrings
+  ansible.builtin.file:
+    path: /usr/share/keyrings
+    state: directory
+    mode: '0755'
 
-    # --- Sektion für Fedora/RHEL ---
-    - name: add Vivaldi Repository (RedHat/Fedora)
-      when: ansible_os_family == "RedHat"
-      ansible.builtin.yum_repository:
-        name: vivaldi
-        description: Vivaldi Browser
-        baseurl: https://repo.vivaldi.com/stable/rpm/x86_64
-        enabled: yes
-        gpgcheck: yes
-        gpgkey: https://repo.vivaldi.com/stable/linux_signing_key.pub
+- name: Add Vivaldi GPG key
+  ansible.builtin.get_url:
+    url: "{{ vivaldi_gpg_key }}"
+    dest: /tmp/vivaldi_key.pub
+    mode: '0644'
 
-    # --- Installation ---
-    - name: install Vivaldi-stable 
-      ansible.builtin.package:
-        name: vivaldi-stable
-        state: present
-        update_cache: yes
+- name: De-armor Vivaldi GPG key
+  ansible.builtin.shell:
+    cmd: "gpg --dearmor < /tmp/vivaldi_key.pub > /usr/share/keyrings/vivaldi-browser.gpg"
+    creates: /usr/share/keyrings/vivaldi-browser.gpg
 
----
-- name: Vivaldi configure adblocker and tracking protection 
-  hosts: all
-  become: yes
-  tasks:
-    - name: create dir for Vivaldi Policies
-      ansible.builtin.file:
-        path: /etc/vivaldi/policies/managed
-        state: directory
-        mode: '0755'
+- name: Add Vivaldi Repository
+  ansible.builtin.apt_repository:
+    repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/vivaldi-browser.gpg] {{ vivaldi_repo_url }} stable main"
+    state: present
+    filename: vivaldi
 
-    - name: activate Vivaldi Adblocker and Tracking-Schutz via Policy 
-      ansible.builtin.copy:
-        dest: /etc/vivaldi/policies/managed/custom_settings.json
-        content: |
-          {
-            "VivaldiAdAndTrackerBlocker": 2,
-            "DefaultSearchProviderEnabled": true
-          }
-        mode: '0644'
-
----
-- name: Vivaldi Pro-config
-  hosts: all
-  become: yes
-  vars:
-    # Hier kannst du deine gewünschte Startseite eintragen
-    homepage_url: "https://www.google.de"
-    
-    # IDs der Extensions (findest du in der URL des Chrome Web Stores)
-    # Beispiel: uBlock Origin & Bitwarden
-    extensions:
-      - "cjpalhdlnbpafiamejdnhcphjbkeiagm;https://clients2.google.com/service/update2/crx"
-      - "nngceckbapebfimnlniiiahkandclblb;https://clients2.google.com/service/update2/crx"
-
-  tasks:
-    - name: apply extended Vivaldi policies
-      ansible.builtin.file:
-        path: /etc/vivaldi/policies/managed
-        state: directory
-        mode: '0755'
-
-      ansible.builtin.copy:
-        dest: /etc/vivaldi/policies/managed/extended_settings.json
-        content: |
-          {
-            "VivaldiAdAndTrackerBlocker": 2,
-            "HomepageLocation": "{{ homepage_url }}",
-            "HomepageIsNewTabPage": false,
-            "RestoreOnStartup": 4,
-            "RestoreOnStartupURLs": ["{{ homepage_url }}"],
-            "ExtensionInstallForcelist": {{ extensions | to_json }}
-          }
-        mode: '0644'
+- name: Install Vivaldi Browser
+  ansible.builtin.apt:
+    name: "{{ vivaldi_package }}"
+    state: present
+    update_cache: yes

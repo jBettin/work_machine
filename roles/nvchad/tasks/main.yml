@@ -1,81 +1,47 @@
 ---
-- name: Installation von NvChad und aller Abhängigkeiten
-  hosts: localhost 
-  connection: local
-  become: yes 
+- name: Install dependencies for Neovim and NvChad
+  ansible.builtin.apt:
+    name:
+      - git
+      - curl
+      - unzip
+      - build-essential
+      - python3-pip
+      - ripgrep
+    state: present
+    update_cache: yes
 
-  vars:
-    # Die Version von Neovim, die NvChad mindestens benötigt
-    min_nvim_version: "0.8.0"
+- name: Download Neovim AppImage
+  ansible.builtin.get_url:
+    url: "{{ nvim_appimage_url }}"
+    dest: /usr/local/bin/nvim
+    mode: '0755'
 
-  pre_tasks:
-    - name: FAKTEN SAMMELN (OS)
-      ansible.builtin.setup:
+- name: Ensure Nvim config directory is clean
+  become: no
+  ansible.builtin.file:
+    path: "{{ dev_home }}/.config/nvim"
+    state: absent
+  when: nvchad_force_reinstall | default(false)
 
-    - name: PRÜFE - Neovim-Version prüfen (falls bereits installiert)
-      ansible.builtin.shell: "nvim --version | head -n 1 | awk '{print $2}'"
-      register: current_nvim_version
-      ignore_errors: yes
-      changed_when: false
+- name: Clone NvChad repository
+  become: no
+  ansible.builtin.git:
+    repo: "{{ nvchad_repo }}"
+    dest: "{{ dev_home }}/.config/nvim"
+    version: "{{ nvchad_version }}"
+    depth: 1
 
-    - name: WARNUNG - Neovim-Version ist zu niedrig
-      ansible.builtin.fail:
-        msg: "Neovim Version {{ current_nvim_version.stdout }} gefunden. Bitte mindestens {{ min_nvim_version }} installieren!"
-      when:
-        - current_nvim_version.rc == 0
-        - current_nvim_version.stdout is version(min_nvim_version, '<')
+- name: Fix ownership of nvim config
+  ansible.builtin.file:
+    path: "{{ dev_home }}/.config/nvim"
+    owner: "{{ dev_user }}"
+    group: "{{ dev_user }}"
+    recurse: yes
 
-  tasks:
-    - name: INSTALLIERE - Git sicherstellen (für das Klonen von NvChad)
-      ansible.builtin.package:
-        name: git
-        state: present
-        
-    # --- BLOCK: Linux (Debian/Ubuntu) Dependencies ---
-    - name: BLOCK - Linux-Abhängigkeiten (Neovim & Build-Tools)
-      when: ansible_os_family == "Debian" or ansible_os_family == "RedHat"
-      block:
-        - name: SICHERSTELLEN - Neovim ist installiert (z.B. über PPA oder Snap)
-          ansible.builtin.package:
-            name: neovim
-            state: present
-
-        - name: SICHERSTELLEN - Python-Tools für Neovim-Provider
-          ansible.builtin.package:
-            name: python3-pynvim
-            state: present
-          when: ansible_os_family == "Debian"
-
-        - name: HINWEIS FÜR LINUX
-          ansible.builtin.debug:
-            msg: "Unter Linux müssen Sie möglicherweise ein aktuelles Neovim (v0.8+) manuell über PPA, AppImage oder Snap installieren, da die Standard-Repositorys oft veraltete Versionen enthalten."
-
-    # --- BLOCK: NvChad Installation ---
-    - name: BLOCK - NvChad installieren
-      block:
-        - name: PRÜFE - Ob NvChad-Konfiguration bereits existiert
-          ansible.builtin.stat:
-            path: "~/.config/nvim"
-          register: nvim_config_check
-          
-        - name: SICHTE - Die vorhandene Neovim-Konfiguration
-          ansible.builtin.debug:
-            msg: "Bestehende Neovim-Konfiguration im ~/.config/nvim gefunden! Bitte manuell löschen oder umbenennen, um Konflikte mit NvChad zu vermeiden."
-          when: nvim_config_check.stat.exists and not nvim_config_check.stat.islnk
-
-        - name: KLONE - NvChad-Konfiguration
-          ansible.builtin.git:
-            repo: 'https://github.com/NvChad/NvChad.git'
-            dest: "~/.config/nvim"
-            version: "v2.5" # Verwenden Sie eine bestimmte Version für Stabilität
-            recursive: yes
-            update: yes
-          when: not nvim_config_check.stat.exists or nvim_config_check.stat.islnk
-
-        - name: FÜHRE - Neovim einmal aus, um Packer-Plugins herunterzuladen
-          ansible.builtin.shell: "nvim --headless +PackerSync +qa"
-          args:
-            chdir: "~/.config/nvim"
-          environment:
-            HOME: "{{ ansible_env.HOME }}"
-            PATH: "{{ '/opt/homebrew/bin:' if ansible_os_family == 'Darwin' else '' }}{{ ansible_env.PATH }}"
+- name: Create local bin directory for user
+  become: no
+  ansible.builtin.file:
+    path: "{{ dev_home }}/.local/bin"
+    state: directory
+    mode: '0755'

@@ -1,0 +1,11 @@
+- name: Install JetBrainsMono Nerd Font
+  become: no
+  ansible.builtin.shell: |
+    mkdir -p {{ dev_home }}/.local/share/fonts
+    cd {{ dev_home }}/.local/share/fonts
+    curl -fLO https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.zip
+    unzip -o JetBrainsMono.zip
+    rm JetBrainsMono.zip
+    fc-cache -f
+  args:
+    creates: "{{ dev_home }}/.local/share/fonts/JetBrainsMonoNerdFont-Regular.ttf"

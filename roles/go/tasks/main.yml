@@ -1,56 +1,41 @@
 ---
-- name: Install and Configure Go (Golang)
-  hosts: all
-  become: yes
-  vars:
-    go_version: "1.25.0"  # Hier die gewünschte Version eintragen
-    go_archive: "go{{ go_version }}.linux-amd64.tar.gz"
-    go_download_url: "https://go.dev/dl/{{ go_archive }}"
+- name: Remove old Go installation
+  ansible.builtin.file:
+    path: /usr/local/go
+    state: absent
 
-  tasks:
-    - name: Download Go archive
-      ansible.builtin.get_url:
-        url: "{{ go_download_url }}"
-        dest: "/tmp/{{ go_archive }}"
-        mode: '0644'
+- name: Extract Go archive to /usr/local
+  ansible.builtin.unarchive:
+    src: "/tmp/{{ go_archive }}"
+    dest: /usr/local
+    remote_src: yes
 
-    - name: Remove old Go installation
-      ansible.builtin.file:
-        path: /usr/local/go
-        state: absent
+- name: Add Go to system PATH (global)
+  ansible.builtin.copy:
+    dest: /etc/profile.d/golang.sh
+    content: |
+      export PATH=$PATH:/usr/local/go/bin
+    mode: '0644'
 
-    - name: Extract Go archive to /usr/local
-      ansible.builtin.unarchive:
-        src: "/tmp/{{ go_archive }}"
-        dest: /usr/local
-        remote_src: yes
+- name: Add Go paths to User Zsh config
+  become: no
+  ansible.builtin.blockinfile:
+    path: "{{ ansible_env.HOME }}/.zshrc"
+    block: |
+      # Go Configuration
+      export GOROOT=/usr/local/go
+      export GOPATH=$HOME/go
+      export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
+    marker: "# {mark} ANSIBLE MANAGED BLOCK: Go"
 
-    - name: Add Go to system PATH (global)
-      ansible.builtin.copy:
-        dest: /etc/profile.d/golang.sh
-        content: |
-          export PATH=$PATH:/usr/local/go/bin
-        mode: '0644'
+- name: Ensure GOPATH directory exists
+  become: no
+  ansible.builtin.file:
+    path: "{{ ansible_env.HOME }}/go"
+    state: directory
+    mode: '0755'
 
-    - name: Add Go paths to User Zsh config
-      become: no
-      ansible.builtin.blockinfile:
-        path: "{{ ansible_env.HOME }}/.zshrc"
-        block: |
-          # Go Configuration
-          export GOROOT=/usr/local/go
-          export GOPATH=$HOME/go
-          export PATH=$PATH:$GOROOT/bin:$GOPATH/bin
-        marker: "# {mark} ANSIBLE MANAGED BLOCK: Go"
-
-    - name: Ensure GOPATH directory exists
-      become: no
-      ansible.builtin.file:
-        path: "{{ ansible_env.HOME }}/go"
-        state: directory
-        mode: '0755'
-
-    - name: Cleanup download
-      ansible.builtin.file:
-        path: "/tmp/{{ go_archive }}"
-        state: absent
+- name: Cleanup download
+  ansible.builtin.file:
+    path: "/tmp/{{ go_archive }}"
+    state: absent

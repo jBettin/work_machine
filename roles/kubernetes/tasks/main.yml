@@ -1,72 +1,68 @@
 ---
-- name: Install Kubernetes CLI Tools (No Minikube)
-  hosts: all
-  become: yes
-  tasks:
-    - name: Install dependencies
-      ansible.builtin.apt:
-        name: [apt-transport-https, ca-certificates, curl, gnupg]
-        state: present
-        update_cache: yes
+- name: Install dependencies
+  ansible.builtin.apt:
+    name: [apt-transport-https, ca-certificates, curl, gnupg]
+    state: present
+    update_cache: yes
 
-    - name: Create keyring directory
-      ansible.builtin.file:
-        path: /etc/apt/keyrings
-        state: directory
-        mode: '0755'
+- name: Create keyring directory
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: '0755'
 
     # --- KUBECTL ---
-    - name: Add Kubernetes GPG key
-      ansible.builtin.get_url:
-        url: https://pkgs.k8s.io/core:/stable:/v1.31/deb/Release.key
-        dest: /etc/apt/keyrings/kubernetes-apt-keyring.asc
-        mode: '0644'
+- name: Add Kubernetes GPG key
+  ansible.builtin.get_url:
+    url: https://pkgs.k8s.io/core:/stable:/v1.31/deb/Release.key
+    dest: /etc/apt/keyrings/kubernetes-apt-keyring.asc
+    mode: '0644'
 
-    - name: Add Kubernetes Repository
-      ansible.builtin.apt_repository:
-        repo: "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.asc] https://pkgs.k8s.io/core:/stable:/v1.31/deb/ /"
-        state: present
-        filename: kubernetes
+- name: Add Kubernetes Repository
+  ansible.builtin.apt_repository:
+    repo: "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.asc] https://pkgs.k8s.io/core:/stable:/v1.31/deb/ /"
+    state: present
+    filename: kubernetes
 
-    - name: Install kubectl
-      ansible.builtin.apt:
-        name: kubectl
-        state: present
-        update_cache: yes
-
+- name: Install kubectl
+  ansible.builtin.apt:
+    name: kubectl
+    state: present
+    update_cache: yes
     # --- HELM ---
-    - name: Add Helm GPG key
-      ansible.builtin.get_url:
-        url: https://baltocdn.com/helm/signing.asc
-        dest: /etc/apt/keyrings/helm.asc
-        mode: '0644'
 
-    - name: Add Helm Repository
-      ansible.builtin.apt_repository:
-        repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/helm.asc] https://baltocdn.com/helm/stable/debian/ all main"
-        state: present
-        filename: helm-stable
+- name: Add Helm GPG key
+  ansible.builtin.get_url:
+    url: https://baltocdn.com/helm/signing.asc
+    dest: /etc/apt/keyrings/helm.asc
+    mode: '0644'
 
-    - name: Install Helm
-      ansible.builtin.apt:
-        name: helm
-        state: present
-        update_cache: yes
+- name: Add Helm Repository
+  ansible.builtin.apt_repository:
+    repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/helm.asc] https://baltocdn.com/helm/stable/debian/ all main"
+    state: present
+    filename: helm-stable
+
+- name: Install Helm
+  ansible.builtin.apt:
+    name: helm
+    state: present
+    update_cache: yes
 
     # --- K9S (Terminal UI) ---
-    - name: Install k9s via Snap
-      community.general.snap:
-        name: k9s
-        state: present
+- name: Install k9s via Snap
+  community.general.snap:
+    name: k9s
+    state: present
 
     # --- ZSH CONFIG ---
-    - name: Enable Zsh Completion for kubectl and helm
-      become: no
-      ansible.builtin.blockinfile:
-        path: "{{ ansible_env.HOME }}/.zshrc"
-        block: |
-          source <(kubectl completion zsh)
-          source <(helm completion zsh)
-          alias k=kubectl
-          complete -F __start_kubectl k
-        marker: "# {mark} ANSIBLE MANAGED BLOCK: Kubernetes"
+- name: Enable Zsh Completion for kubectl and helm
+  become: no
+  ansible.builtin.blockinfile:
+    path: "{{ ansible_env.HOME }}/.zshrc"
+    block: |
+      source <(kubectl completion zsh)
+      source <(helm completion zsh)
+      alias k=kubectl
+      complete -F __start_kubectl k
+  marker: "# {mark} ANSIBLE MANAGED BLOCK: Kubernetes"
