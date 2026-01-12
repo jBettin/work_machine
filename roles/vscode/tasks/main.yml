@@ -1,48 +1,36 @@
 ---
-- name: import gpg key
-  ansible.builtin.apt_key:
-      url: https://packages.microsoft.com/keys/microsoft.asc
-      state: present
-      register: key_import
+- name: Abhängigkeiten für Repository-Management installieren
+  become: yes
+  apt:
+    name:
+      - gpg
+      - apt-transport-https
+      - software-properties-common
+    state: present
 
-- name: add vscode repository
-  ansible.builtin.apt_repository:
-    repo: deb [arch=amd64] https://packages.microsoft.com/repos/vscode stable main
+- name: Microsoft GPG-Key herunterladen
+  become: yes
+  get_url:
+    url: "{{ vscode_gpg_key_url }}"
+    dest: /usr/share/keyrings/microsoft.asc
+    mode: '0644'
+
+- name: VS Code Repository hinzufügen
+  become: yes
+  apt_repository:
+    repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft.asc] https://packages.microsoft.com/repos/code stable main"
     state: present
     filename: vscode
-    register: repo_add
 
-- name: install vscode
-  ansible.builtin.apt:
+- name: Visual Studio Code installieren
+  become: yes
+  apt:
     name: code
     state: present
     update_cache: yes
 
-- name: Ensure font directory exists
-  ansible.builtin.file:
-    path: "~/.local/share/fonts"
-    state: directory
-    mode: '0755'
-
-- name: Download and Install FiraCode Nerd Font (Example)
-  ansible.builtin.get_url:
-    url: "https://github.com/ryanoasis/nerd-fonts/releases/download/v3.1.1/FiraCode.zip"
-    dest: "/tmp/FiraCode.zip"
-
-- name: Create VS Code User directory if it doesn't exist
-  ansible.builtin.file:
-    path: "~/.config/Code/User"
-    state: directory
-    mode: '0755'
-
-- name: Apply VS Code Terminal Font Settings
-  ansible.builtin.copy:
-    dest: "~/.config/Code/User/settings.json"
-    content: |
-     {
-        "terminal.integrated.fontFamily": "FiraCode Nerd Font",
-        "terminal.integrated.fontSize": 14,
-        "editor.fontFamily": "'Fira Code', 'Droid Sans Mono', 'monospace'",
-        "editor.fontLigatures": true
-      }
-    mode: '0644'
+- name: VS Code Extensions installieren
+  shell: "code --install-extension {{ item }} --force"
+  loop: "{{ vscode_extensions }}"
+  register: extension_result
+  changed_when: "'already installed' not in extension_result.stdout"
