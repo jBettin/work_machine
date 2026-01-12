@@ -17,7 +17,7 @@
     name: code
     state: present
     update_cache: yes
----
+
 - name: Ensure font directory exists
   ansible.builtin.file:
     path: "~/.local/share/fonts"
