@@ -64,4 +64,4 @@
       source <(helm completion zsh)
       alias k=kubectl
       complete -F __start_kubectl k
-  marker: "# {mark} ANSIBLE MANAGED BLOCK: Kubernetes"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK: Kubernetes"
