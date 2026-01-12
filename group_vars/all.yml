@@ -23,6 +23,16 @@ terraform_version: "1.7.0"
 docker_users:
   - "{{ dev_user }}"
 
+# System-Pakete, die für Neovim & NvChad benötigt werden
+dependencies:
+  - neovim
+  - git
+  - ripgrep
+  - build-essential
+  - unzip
+  - python3-pip
+
+# Pfade und Repository-Infos
 nvim_dest_dir: "{{ ansible_env.HOME }}/.config/nvim"
 nvchad_repo: "https://github.com/NvChad/starter"
 backup_suffix: ".bak_{{ ansible_date_time.date }}"
