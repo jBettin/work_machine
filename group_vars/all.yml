@@ -49,7 +49,4 @@ vscode_repo_url: "deb [arch=amd64,arm64,armhf] https://packages.microsoft.com/re
 # Liste der Extensions, die du direkt mitinstallieren möchtest
 vscode_extensions:
   - ms-python.python
-  - ms-kubernetes-tools.vscode-kubernetes-tools
-  - redhat.ansible
   - golang.go
-  - vscode-icons-team.vscode-icons

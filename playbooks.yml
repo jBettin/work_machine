@@ -4,11 +4,12 @@
   connection: local
   become: yes
   roles:
-    #- zsh
+    - zsh
     - nvchad
     - docker
     #- kubernetes
-    - vscode    
+    - vscode
+    - nerdfont    
     - terraform 
     - keypassxc
     - obsidian
