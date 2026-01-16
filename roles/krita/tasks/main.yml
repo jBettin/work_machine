@@ -1,10 +1,12 @@
 ---
-- name: Install Flatpak
-  ansible.builtin.apt:
-    name: flatpak
+- name: Add Krita PPA and update cache
+  ansible.builtin.apt_repository:
+    repo: "ppa:krita-pim/ppa"
     state: present
+    update_cache: yes
 
-- name: Install Krita via Flatpak
-  community.general.flatpak:
-    name: org.kde.krita
+# Dieser Task ersetzt: sudo apt install krita
+- name: Install Krita
+  ansible.builtin.apt:
+    name: krita
     state: present
