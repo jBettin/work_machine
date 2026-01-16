@@ -1,5 +1,4 @@
 ---
----
 - name: Install krita
   community.general.snap:
     name: krita
