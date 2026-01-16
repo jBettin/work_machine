@@ -1,17 +1,10 @@
 ---
-- name: Add Krita PPA repository
-  ansible.builtin.apt_repository:
-    repo: "{{ krita_ppa }}"
-    state: present
-    update_cache: yes
-
-- name: Install Krita
+- name: Install Flatpak
   ansible.builtin.apt:
-    name: "{{ krita_package }}"
+    name: flatpak
     state: present
-    update_cache: yes
 
-- name: Install Krita translation packages
-  ansible.builtin.apt:
-    name: krita-l10n
+- name: Install Krita via Flatpak
+  community.general.flatpak:
+    name: org.kde.krita
     state: present
