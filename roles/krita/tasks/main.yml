@@ -1,7 +1,7 @@
 ---
-- name: Add Krita Lime PPA repository
+- name: Add Krita PPA repository
   ansible.builtin.apt_repository:
-    repo: 'ppa:kritalime/ppa'
+    repo: 'ppa:krita-pim/ppa'
     state: present
     update_cache: yes
 
@@ -10,5 +10,4 @@
     name:
       - krita
       - krita-l10n  # Sprachpaket für Deutsch
-      - ffms2       # Für besseren Video/Animation-Support
     state: present
