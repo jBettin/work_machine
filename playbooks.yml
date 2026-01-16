@@ -10,7 +10,7 @@
     #- kubernetes
     #- vscode
     - nerdfont    
-    - terraform 
+    #- terraform 
     - keypassxc
     - obsidian
     - vivaldi
