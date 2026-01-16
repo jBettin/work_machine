@@ -1,12 +1,6 @@
 ---
-- name: Add Krita PPA and update cache
-  ansible.builtin.apt_repository:
-    repo: "ppa:krita-pim/ppa"
-    state: present
-    update_cache: yes
-
-# Dieser Task ersetzt: sudo apt install krita
-- name: Install Krita
-  ansible.builtin.apt:
+---
+- name: Install krita
+  community.general.snap:
     name: krita
     state: present
