@@ -52,5 +52,5 @@ vscode_extensions:
   - golang.go
 
   # Krita Einstellungen
-krita_ppa: "ppa:krita-pim/ppa"
+krita_ppa: "ppa:krita-lime/ppa"
 krita_package: "krita"
