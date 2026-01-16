@@ -50,3 +50,7 @@ vscode_repo_url: "deb [arch=amd64,arm64,armhf] https://packages.microsoft.com/re
 vscode_extensions:
   - ms-python.python
   - golang.go
+
+  # Krita Einstellungen
+krita_ppa: "ppa:krita-pim/ppa"
+krita_package: "krita"

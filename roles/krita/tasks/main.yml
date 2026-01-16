@@ -1,13 +1,17 @@
 ---
 - name: Add Krita PPA repository
   ansible.builtin.apt_repository:
-    repo: 'ppa:krita-pim/ppa'
+    repo: "{{ krita_ppa }}"
     state: present
     update_cache: yes
 
-- name: Install Krita and support packages
+- name: Install Krita
   ansible.builtin.apt:
-    name:
-      - krita
-      - krita-l10n  # Sprachpaket für Deutsch
+    name: "{{ krita_package }}"
+    state: present
+    update_cache: yes
+
+- name: Install Krita translation packages
+  ansible.builtin.apt:
+    name: krita-l10n
     state: present
